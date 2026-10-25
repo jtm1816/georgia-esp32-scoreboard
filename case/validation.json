@@ -1,0 +1,70 @@
+{
+  "front-bezel-red.stl": {
+    "watertight": true,
+    "volume_mm3": 12002.93,
+    "bounds_mm": [
+      [
+        -50.0,
+        -40.0,
+        0.0
+      ],
+      [
+        50.0,
+        40.0,
+        5.8
+      ]
+    ],
+    "components": 1
+  },
+  "lettering-white.stl": {
+    "watertight": true,
+    "volume_mm3": 542.8,
+    "bounds_mm": [
+      [
+        -30.871,
+        -37.044,
+        0.0
+      ],
+      [
+        30.314,
+        37.036,
+        1.2
+      ]
+    ],
+    "components": 15
+  },
+  "rear-shell-black.stl": {
+    "watertight": true,
+    "volume_mm3": 36486.49,
+    "bounds_mm": [
+      [
+        -50.0,
+        -40.0,
+        0.0
+      ],
+      [
+        50.0,
+        41.386,
+        32.528
+      ]
+    ],
+    "components": 1
+  },
+  "stand-black.stl": {
+    "watertight": true,
+    "volume_mm3": 44255.36,
+    "bounds_mm": [
+      [
+        -47.0,
+        -20.0,
+        0.0
+      ],
+      [
+        47.0,
+        50.0,
+        50.456
+      ]
+    ],
+    "components": 1
+  }
+}

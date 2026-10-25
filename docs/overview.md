@@ -48,3 +48,19 @@ All times use Eastern time and adjust for daylight saving changes. Unannounced s
 - If Wi-Fi setup opens, join **Dawgs-Setup**, use **GoDawgs!**, and visit **192.168.4.1**.
 - If taps land in the wrong spot, hold BOOT for 2.5 seconds and press the two calibration crosses firmly.
 - See the [project README](../README.md) for building and installing the firmware.
+
+## 3D-printed Georgia case
+
+![Case preview](../case/case-preview.png)
+
+The case has a red bezel with raised white GEORGIA and BULLDOGS lettering, a black rear shell, and a black stand holding the screen **30 degrees back from vertical**. A solid lower support fills the space between the bezel and the flat base.
+
+Four rear M3 screws pass through the board mounting holes into heat-set inserts in the front bezel. The **14 x 5.5 mm USB-C power opening** faces straight backward, parallel to the desk, in a vertical mount resting on the base. The USB-C adapter is for power only.
+
+**Recommended material: PETG** in red, white, and black. Start with 0.20 mm layers, 4 walls, and 20-30% infill. The rear shell needs supports around its projecting USB mount; the other parts can start with supports off. For same-material PETG supports, begin with a 0.30 mm Z gap, 0.6 mm XY separation, and 3 interface layers, then check your slicer's effective settings.
+
+- [Download all case print files and editable design](../case/georgia-case-print-files.zip)
+- [Assembly, hardware, and detailed PETG/support settings](../case/ASSEMBLY.md)
+- [Individual STL files and editable source](../case)
+
+The files passed digital solid checks. Physical board fit, adapter retention, and print/support settings have not yet been verified on a printed case. Match the M3 insert dimensions to your actual inserts before printing.
