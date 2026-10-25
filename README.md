@@ -1,6 +1,6 @@
 # Georgia Bulldogs desk scoreboard
 
-Firmware for the ESP32-2432S028 family with ILI9341 or ST7789 display and XPT2046 resistive touch. Football, men's basketball, and baseball only. Hardware validation is in progress; screen variants require the correct panel setting.
+Firmware for the ESP32-2432S028 family with ILI9341 or ST7789 display and XPT2046 resistive touch. Football, men's basketball, and baseball only. The ST7789 setting, landscape display, correct colors, Wi-Fi connection, and football feed refresh were verified on a single-USB board on October 24, 2026. Other screen variants require the correct panel setting.
 
 ![Example Georgia scoreboard](docs/football-preview.png)
 
@@ -44,3 +44,4 @@ Install PlatformIO, open this folder, and run `pio run`. Use `pio run -t upload 
 Board pins: display SCK 14 / MOSI 13 / MISO 12 / CS 15 / DC 2 / backlight 21. Touch SCK 25 / MOSI 32 / MISO 39 / CS 33 / IRQ 36.
 
 The Georgia G asset is sourced from the FBS Logo Library. Georgia marks belong to their respective owner. The feed's verified TLS root certificate is included in `include/feed_ca.h`.
+
