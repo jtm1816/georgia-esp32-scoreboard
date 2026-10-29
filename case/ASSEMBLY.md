@@ -1,4 +1,4 @@
-# Georgia scoreboard case — design revision 6
+# Georgia ESP32-035 case - migration revision 1
 
 ![Actual CAD geometry](case-preview.png)
 
@@ -11,18 +11,20 @@
 | rear-shell-black.stl | Black | 1 |
 | stand-black.stl | Black | 1 |
 
-The bezel has no stylus holder. The black cradle holds the screen 30 degrees back from vertical (60 degrees above the desk). The case body is 100 � 80 � 24 mm. A solid black lower plinth fills the gap from the bottom of the bezel to the flat base. Its front edge aligns with the lower bezel edge, with no projecting front tray.
+Red front, white raised lettering, black rear and fixed stand. The body is 125 x 88 x 30 mm. The lower gap is filled, with no stylus holder. The USB-C power adapter faces straight backward, parallel to the desk, and its lower mount rests at the base.
 
-## Hardware assumptions — check against your actual parts
+## ESP32-035 hardware assumptions
 
-- PCB outline: 86 × 50 mm; PCB thickness: 1.6 mm.
-- Four mounting holes: 78 × 42 mm center spacing, nominal 3.2 mm board-hole diameter.
-- Screen assembly: approximately 70 × 50 mm and 4 mm above the PCB. Visible front opening: 60 × 45.5 mm. The screen pocket is centered; actual board revisions may have different offsets or display dimensions.
-- Four **M3 heat-set inserts, 4.6 mm outside diameter × 4.0 mm long**. The model uses 4.6 mm pilot pockets, 4.3 mm deep, in 7.2 mm bosses. Insert suppliers specify their own pilot sizes; adjust `insert_od` to the supplier's recommended pilot diameter. Do not use longer inserts in these blind pockets without redesigning the boss stack.
-- Four **M3 × 20 mm button-head screws**. Rear head pockets are 6.2 mm diameter × 1.8 mm deep. Verify actual screw-head dimensions and insertion depth; screws must not bottom out in the inserts.
-- Rear USB-C opening: **14 mm wide x 5.5 mm tall**, horizontal, with no extra clearance. A vertical mounting pad rests on the 3 mm flat base, so the cable enters straight backward parallel to the desk. An internal recess leaves a 2.4 mm mounting face. Adapter retention and internal wiring clearance need checking against the actual adapter.
+- Board outline: 101.5 x 55.5 mm. Four mounting holes (assumed 3.2 mm; the supplied drawing does not label their diameter) at 94.5 x 47.9 mm center spacing, per the supplied board diagram.
+- Body: 125 x 88 x 30 mm. Stand: 119 mm wide, approximately 84 mm deep after front trimming. Fixed 30-degree tilt back from vertical.
+- Visible window: 74.2 x 49.6 mm around an assumed 73.44 x 48.96 mm active area; this active-area size is not dimensioned on the supplied image. Provisional centered glass pocket: 85.6 x 56.1 mm, based on the 85 mm glass width and full-board height shown. Measure the actual glass outline and offset before printing.
+- PCB thickness 1.6 mm and front PCB plane 6.8 mm behind the bezel face are provisional. The pocket floor is 1.8 mm behind the front; this allows a nominal 5 mm screen stack. Do not clamp the screen if the actual stack differs.
+- Four M3 heat-set inserts: assumed 4.6 mm outside diameter x 4 mm long, in 4.6 mm pilot pockets 4.3 mm deep. Use the insert supplier's recommended pilot size, adjusting `insert_od` as needed.
+- Four M3 x 25 mm button-head screws are suggested for this deeper case, assuming 6.2 mm diameter x 1.8 mm head recesses. Check screw length against the actual assembled stack so screws engage the inserts without bottoming out.
+- USB-C adapter opening: exactly 14 mm wide x 5.5 mm tall, with no added clearance. The vertical mounting face is 2.4 mm thick and the pad rests at base level. A stand recess clears the lowered pad. Adapter retention clips, flange size, solder pads, cable bend space, and internal wiring fit remain unverified.
+- The board diagram shows edge USB, SD, switches and connectors. The larger cavity leaves space around the PCB but does not provide outside access cutouts to every board connector. Open the shell for programming, SD or button access. No battery or speaker is included in this design.
 
-The user elected to skip the mounting-hole fit-check print. These files use published dimensions; no physical fit or load testing has been performed. Digital solid checks do not prove hardware fit.
+No physical fit, load, or print test has been performed on the new case. Do not reuse the old 2.8-inch case dimensions. Digital mesh and interference checks do not establish hardware fit.
 
 ## PETG printing recommendations
 
@@ -72,7 +74,6 @@ The lettering uses Arial Black when available. On other systems, set `GEORGIA_CA
 
 ## References
 
-- [Manufacturer specifications, mounting drawing on page 6](https://mischianti.org/wp-content/uploads/2025/04/ESP32-2432S028-Specifications-EN.pdf)
-- [Element14 board dimensions and technical drawing](https://community.element14.com/technologies/embedded/b/blog/posts/esp32-cheap-yellow-display-cyd-guide-with-a-jellyfish-example)
-
-The Element14 drawing is approximate and describes a different USB-port revision; board geometry must be checked against the actual hardware.
+- Supplied JC4827W543 board structure diagram: [mounting dimensions](../docs/board-dimensions.png).
+- ESP32-035 reference: original ESP32, shared display/XPT2046 SPI GPIO14/13/12, backlight GPIO27.
+- [ESP32-035 hardware mapping](https://github.com/littleCdev/ESP32-035/blob/master/Hardware.md).

@@ -1,6 +1,6 @@
 # Meet your Georgia scoreboard
 
-A small desk display dedicated to Georgia Bulldogs football, men's basketball, and baseball.
+A 3.5-inch ESP32-035 desk display dedicated to Georgia Bulldogs football, men's basketball, and baseball.
 
 ![Example football scoreboard](football-preview.png)
 
@@ -22,7 +22,7 @@ A small desk display dedicated to Georgia Bulldogs football, men's basketball, a
 
 | Tap | Result |
 | --- | --- |
-| Sport title in the red header | Football → Men's basketball → Baseball → Football |
+| Sport title in the red header | Football â†’ Men's basketball â†’ Baseball â†’ Football |
 | Georgia G | Next three published games for the selected sport, including opponents, dates, Eastern times, venues, and cities |
 
 The schedule automatically closes after **seven seconds**. Tap G again to close it sooner. Changing sports also returns to that sport's scoreboard.
@@ -43,24 +43,22 @@ All times use Eastern time and adjust for daylight saving changes. Unannounced s
 
 ## Setup and care
 
-- Use the single-USB ESP32-2432S028 board and a USB power source.
+- Use the ESP32-035 with XPT2046 resistive touch and a regulated USB power source.
 - Connect it to a 2.4 GHz Wi-Fi network. Credentials remain on the device and are excluded from the project source.
 - If Wi-Fi setup opens, join **Dawgs-Setup**, use **GoDawgs!**, and visit **192.168.4.1**.
-- If taps land in the wrong spot, hold BOOT for 2.5 seconds and press the two calibration crosses firmly.
+- Calibrate the two touch crosses on first run; hold BOOT for 2.5 seconds to repeat calibration.
 - See the [project README](../README.md) for building and installing the firmware.
 
-## 3D-printed Georgia case
+## ESP32-035 printed case
 
 ![Case preview](../case/case-preview.png)
 
-The case has a red bezel with raised white GEORGIA and BULLDOGS lettering, a black rear shell, and a black stand holding the screen **30 degrees back from vertical**. A solid lower support fills the space between the bezel and the flat base.
+The 125 x 88 x 30 mm case retains the red bezel, white GEORGIA/BULLDOGS lettering, black rear and stand, 30-degree tilt, filled lower gap, and straight-back 14 x 5.5 mm USB-C power port at base level. No stylus holder is included.
 
-Four rear M3 screws pass through the board mounting holes into heat-set inserts in the front bezel. The **14 x 5.5 mm USB-C power opening** faces straight backward, parallel to the desk, in a vertical mount resting on the base. The USB-C adapter is for power only.
+The supplied dimensioned image gives a 101.5 x 55.5 mm board with 94.5 x 47.9 mm mounting-hole centers and 85 mm glass width. The model follows these dimensions. Hole diameter, glass height/offset and screen stack remain provisional until checked on the actual hardware.
 
-**Recommended material: PETG** in red, white, and black. Start with 0.20 mm layers, 4 walls, and 20-30% infill. The rear shell needs supports around its projecting USB mount; the other parts can start with supports off. For same-material PETG supports, begin with a 0.30 mm Z gap, 0.6 mm XY separation, and 3 interface layers, then check your slicer's effective settings.
+[Download the case files](../case/georgia-case-print-files.zip) and [read the assembly / PETG support guide](../case/ASSEMBLY.md). Print the bezel red, lettering white, and shell/stand black in PETG. Start with 0.2 mm layers, four walls, and 20-30% infill. The rear USB mounting pad requires support inspection in the slicer. Physical fit and print settings have not been validated on a printed case.
 
-- [Download all case print files and editable design](../case/georgia-case-print-files.zip)
-- [Assembly, hardware, and detailed PETG/support settings](../case/ASSEMBLY.md)
-- [Individual STL files and editable source](../case)
+## Hardware verification
 
-The files passed digital solid checks. Physical board fit, adapter retention, and print/support settings have not yet been verified on a printed case. Match the M3 insert dimensions to your actual inserts before printing.
+On October 29, 2026 the owner confirmed correct landscape colors and both touch controls on the ESP32-035. The upload verified successfully; Wi-Fi connected and the football feed returned data. Printed case fit is still unverified.

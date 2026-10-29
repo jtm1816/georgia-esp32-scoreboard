@@ -14,46 +14,45 @@
 #include "georgia_logo.h"
 #include "feed_ca.h"
 
-// Single-USB ESP32-2432S028: ILI9341 display and XPT2046 touch.
-constexpr uint16_t RED=0xB865, BG=0x0841, MUTED=0xBDF7, GOLD=0xF66C;
+// ESP32-035: 480x320 TFT and XPT2046 on the same HSPI bus.
+// A fixed 16-color palette keeps the 480x320 frame at 76,800 bytes.
+constexpr uint16_t BG=0,WHITE=1,DAWGS_RED=2,MUTED=3,GOLD=4;
+const uint16_t PALETTE[16]={0x0841,0xffff,0xb865,0xbdf7,0xf66c,0xa285,0xfbe0,0x4208,0xf34c,0x2104,0x0000,0x8000,0xc800,0xf000,0x8410,0xd6ba};
 const char* PATHS[]={"football/college-football","basketball/mens-college-basketball","baseball/college-baseball"};
 const char* TITLES[]={"FOOTBALL","MEN'S BASKETBALL","BASEBALL"};
 const char* IDS[]={"61","61","78"};
 TFT_eSPI tft;
 TFT_eSprite screen(&tft);
-SPIClass touchSPI(VSPI);
 XPT2046_Touchscreen touch(33,36);
+constexpr int DISPLAY_W=480,DISPLAY_H=320;
+int calX1=300,calY1=300,calX2=3700,calY2=3700;
 Preferences prefs;
 SemaphoreHandle_t modelMutex;
 volatile int selectedSport=0;
 volatile bool manualSport=false, forceRefresh=true;
 volatile uint32_t revision=0;
-int calX1=200,calY1=240,calX2=3700,calY2=3800;
 String serialLine;
-bool stPanel=false;
 bool scheduleView=false;
 uint32_t scheduleUntil=0, viewSince=0;
 
-// The family is sold with two controllers. Keep the choice changeable over USB.
-void configurePanel(bool st){
-  stPanel=st;tft.init();tft.setRotation(1);
-  if(st){
-    tft.writecommand(0x01);delay(150);tft.writecommand(0x11);delay(120);
-    tft.writecommand(0x3A);tft.writedata(0x55);
-    tft.writecommand(0xB2);for(uint8_t v:{0x0C,0x0C,0x00,0x33,0x33})tft.writedata(v);
-    tft.writecommand(0xB7);tft.writedata(0x35);
-    tft.writecommand(0xBB);tft.writedata(0x19);
-    tft.writecommand(0xC0);tft.writedata(0x2C);
-    tft.writecommand(0xC2);tft.writedata(0x01);
-    tft.writecommand(0xC3);tft.writedata(0x12);
-    tft.writecommand(0xC4);tft.writedata(0x20);
-    tft.writecommand(0xC6);tft.writedata(0x0F);
-    tft.writecommand(0xD0);tft.writedata(0xA4);tft.writedata(0xA1);
-    tft.writecommand(0x36);tft.writedata(prefs.getBool("bgr",false)?0x68:0x60);
-    tft.writecommand(prefs.getBool("invert",false)?0x21:0x20);tft.writecommand(0x13);tft.writecommand(0x29);delay(50);
+void configurePanel(){
+  pinMode(33,OUTPUT);digitalWrite(33,HIGH);
+  tft.init();tft.setRotation(1);tft.invertDisplay(prefs.getBool("035inv",false));
+  pinMode(27,OUTPUT);digitalWrite(27,HIGH);tft.fillScreen(BG);
+  Serial.printf("PANEL ESP32-035 %dx%d ID04=%08lx IDD3=%08lx\n",tft.width(),tft.height(),tft.readcommand32(0x04),tft.readcommand32(0xd3));
+}
+void present(){screen.pushSprite(0,0);}
+void drawLogo(int x,int y){
+  for(int py=0;py<32;py++)for(int px=0;px<46;px++){
+    uint16_t value=pgm_read_word(GEORGIA_LOGO+py*46+px);int best=0,bestDistance=INT_MAX;
+    for(int i=0;i<16;i++){
+      int dr=int((value>>11)&31)-int((PALETTE[i]>>11)&31);
+      int dg=int((value>>5)&63)-int((PALETTE[i]>>5)&63);
+      int db=int(value&31)-int(PALETTE[i]&31);int distance=dr*dr*4+dg*dg+db*db*4;
+      if(distance<bestDistance){bestDistance=distance;best=i;}
+    }
+    screen.drawPixel(x+px,y+py,best);
   }
-  tft.fillScreen(BG);
-  Serial.printf("PANEL %s %dx%d ID04=%08lx IDD3=%08lx\n",st?"ST7789":"ILI9341",tft.width(),tft.height(),tft.readcommand32(0x04),tft.readcommand32(0xD3));
 }
 
 class CooperativeStream:public Stream{
@@ -332,8 +331,8 @@ void feedTask(void*){
   }
 }
 
-void text(String s,int x,int y,int font=2,uint16_t color=TFT_WHITE){screen.setTextColor(color,BG);screen.drawString(ascii(s),x,y,font);}
-void centered(String s,int y,int font=2,uint16_t color=TFT_WHITE){screen.setTextColor(color,BG);screen.drawCentreString(ascii(s),160,y,font);}
+void text(String s,int x,int y,int font=2,uint16_t color=WHITE){screen.setTextColor(color,BG);screen.drawString(ascii(s),x,y,font);}
+void centered(String s,int y,int font=2,uint16_t color=WHITE){screen.setTextColor(color,BG);screen.drawCentreString(ascii(s),240,y,font);}
 void moving(String s,int x,int y,int width,int font,uint16_t color,uint32_t since){
   s=ascii(s);screen.setTextColor(color,BG);int tw=screen.textWidth(s,font);
   screen.setViewport(x,y,width,screen.fontHeight(font));
@@ -342,68 +341,67 @@ void moving(String s,int x,int y,int width,int font,uint16_t color,uint32_t sinc
   screen.resetViewport();
 }
 void ballIcon(int sport,int x,int y){
-  if(sport==0){screen.fillEllipse(x,y,10,6,0xA285);screen.drawLine(x-5,y,x+5,y,TFT_WHITE);for(int a=-3;a<=3;a+=3)screen.drawLine(x+a,y-2,x+a,y+2,TFT_WHITE);}
-  else if(sport==1){screen.fillCircle(x,y,8,0xFBE0);screen.drawCircle(x,y,8,BG);screen.drawLine(x-8,y,x+8,y,BG);screen.drawLine(x,y-8,x,y+8,BG);screen.drawEllipse(x,y,4,8,BG);}
-  else{screen.fillCircle(x,y,8,TFT_WHITE);screen.drawLine(x-5,y-5,x-3,y+5,RED);screen.drawLine(x+5,y-5,x+3,y+5,RED);}
+  if(sport==0){screen.fillEllipse(x,y,10,6,5);screen.drawLine(x-5,y,x+5,y,WHITE);for(int a=-3;a<=3;a+=3)screen.drawLine(x+a,y-2,x+a,y+2,WHITE);}
+  else if(sport==1){screen.fillCircle(x,y,8,6);screen.drawCircle(x,y,8,BG);screen.drawLine(x-8,y,x+8,y,BG);screen.drawLine(x,y-8,x,y+8,BG);screen.drawEllipse(x,y,4,8,BG);}
+  else{screen.fillCircle(x,y,8,WHITE);screen.drawLine(x-5,y-5,x-3,y+5,DAWGS_RED);screen.drawLine(x+5,y-5,x+3,y+5,DAWGS_RED);}
 }
 void drawTeam(const Game& g,int team,int y,int sport,bool fresh){
   String name=team==0?"GEORGIA":g.opponent;name.toUpperCase();
-  if(name.length()>16)name=name.substring(0,16);
-  text(name,36,y,2,team==0?TFT_WHITE:MUTED);
-  if(fresh&&g.live&&g.possession==team)ballIcon(sport,18,y+10);
-  if(fresh&&g.timeouts[team]>=0&&sport<2){int tx=std::min(234,42+screen.textWidth(name,2));
-    for(int i=0;i<g.timeoutSlots;i++)screen.fillCircle(tx+i*8,y+8,2,i<g.timeouts[team]?TFT_WHITE:0x4208);}
-  if(sport==1&&fresh&&g.bonus[team].length())text(g.bonus[team],36,y+20,1,GOLD);
-  screen.setTextColor(TFT_WHITE,BG);screen.drawRightString(g.score[team],307,y-4,4);
+  while(screen.textWidth(name,4)>270&&name.length()>1)name.remove(name.length()-1);
+  text(name,44,y,4,team==0?WHITE:MUTED);
+  if(fresh&&g.live&&g.possession==team)ballIcon(sport,21,y+13);
+  if(fresh&&g.timeouts[team]>=0&&sport<2){int tx=std::min(322,52+screen.textWidth(name,4));
+    for(int i=0;i<g.timeoutSlots;i++)screen.fillCircle(tx+i*9,y+10,3,i<g.timeouts[team]?WHITE:7);}
+  if(sport==1&&fresh&&g.bonus[team].length())text(g.bonus[team],44,y+28,1,GOLD);
+  screen.setTextColor(WHITE,BG);screen.drawRightString(g.score[team],465,y-2,6);
 }
 void countRow(const Game& g,int y,bool fresh){
   String b=fresh&&g.balls>=0?String(g.balls):"-";
   String s=fresh&&g.strikes>=0?String(g.strikes):"-";
   String o=fresh&&g.outs>=0?String(g.outs):"-";
-  text("Balls "+b,36,y,1,MUTED);text("Strikes "+s,112,y,1,MUTED);text("Outs "+o,203,y,1,MUTED);
+  text("Balls "+b,44,y,1,MUTED);text("Strikes "+s,152,y,1,MUTED);text("Outs "+o,270,y,1,MUTED);
 }
 void draw(){
   int sport=selectedSport;Game g=snapshot(sport);screen.fillSprite(BG);
-  screen.fillRect(0,0,320,44,RED);screen.setSwapBytes(true);screen.pushImage(7,6,46,32,GEORGIA_LOGO);
-  screen.setTextColor(TFT_WHITE,RED);screen.drawString("GEORGIA BULLDOGS",61,5,2);screen.drawString(String(TITLES[sport])+" >",61,27,1);
+  screen.fillRect(0,0,480,56,DAWGS_RED);drawLogo(12,12);
+  screen.setTextColor(WHITE,DAWGS_RED);screen.drawString("GEORGIA BULLDOGS",76,4,4);screen.drawString(String(TITLES[sport])+" >",76,36,2);
   bool fresh=g.updated&&millis()-g.updated<120000&&WiFi.status()==WL_CONNECTED&&!g.error;
-  screen.drawRightString(scheduleView?"NEXT":g.live&&fresh?"LIVE":g.state=="post"?"FINAL":"",312,15,1);
+  screen.drawRightString(scheduleView?"NEXT":g.live&&fresh?"LIVE":g.state=="post"?"FINAL":"",468,37,1);
   if(scheduleView){
-    text("NEXT 3 GAMES",10,49,2);text(String(std::max(1,(int)((scheduleUntil-millis()+999)/1000)))+"s",291,50,2,MUTED);
+    text("NEXT 3 GAMES",12,62,2);text(String(std::max(1,(int)((scheduleUntil-millis()+999)/1000)))+"s",450,62,2,MUTED);
     for(int i=0;i<g.nextCount;i++){
-      auto u=g.next[i];int y=74+i*48;
-      moving(String(u.neutral?"vs ":u.home?"vs ":"at ")+u.opponent,10,y,300,2,TFT_WHITE,viewSince);
-      text(localDate(u.date,u.tbd),10,y+17,1,MUTED);
-      moving(u.venue+(u.city.length()?" | "+u.city:""),10,y+29,300,1,MUTED,viewSince);
+      auto u=g.next[i];int y=90+i*68;
+      moving(String(u.neutral?"vs ":u.home?"vs ":"at ")+u.opponent,12,y,456,2,WHITE,viewSince);
+      text(localDate(u.date,u.tbd),12,y+19,1,MUTED);
+      moving(u.venue+(u.city.length()?" | "+u.city:""),12,y+32,456,1,MUTED,viewSince);
     }
-    if(!g.nextCount)centered(g.loaded?"No published upcoming games":"Loading schedule...",105,2);
+    if(!g.nextCount)centered(g.loaded?"No published upcoming games":"Loading schedule...",128,2);
   }else{
-    moving(g.status,10,49,181,2,MUTED,viewSince);
-    moving(g.detail,194,50,116,1,MUTED,viewSince);
-    int y0=76,y1=114;
-    if(sport==2&&g.possession==0)y1=127;
+    moving(g.status,12,62,280,2,MUTED,viewSince);
+    moving(g.detail,300,65,168,1,MUTED,viewSince);
+    int y0=96,y1=160;
     drawTeam(g,0,y0,sport,fresh);
-    if(sport==2&&g.possession==0)countRow(g,y0+24,fresh);
+    if(sport==2&&g.possession==0)countRow(g,y0+31,fresh);
     drawTeam(g,1,y1,sport,fresh);
-    if(sport==2&&g.possession==1)countRow(g,y1+24,fresh);
-    if(sport==2&&g.possession<0&&g.live)countRow(g,148,false);
+    if(sport==2&&g.possession==1)countRow(g,y1+31,fresh);
+    if(sport==2&&g.possession<0&&g.live)countRow(g,211,false);
     String venue=g.venue;if(g.city.length())venue+=(venue.length()?" | ":"")+g.city;
-    moving(venue.length()?venue:"Location not published",10,165,300,1,MUTED,viewSince);
-    screen.drawFastHLine(10,179,300,0x4208);text("LAST PLAY",10,184,1,0xF34C);
-    moving(g.lastPlay,10,198,300,2,TFT_WHITE,viewSince);
+    moving(venue.length()?venue:"Location not published",12,230,456,1,MUTED,viewSince);
+    screen.drawFastHLine(12,248,456,7);text("LAST PLAY",12,254,1,8);
+    moving(g.lastPlay,12,272,456,2,WHITE,viewSince);
   }
-  screen.fillRect(0,225,320,15,0x2104);screen.setTextColor(MUTED,0x2104);
+  screen.fillRect(0,302,480,18,9);screen.setTextColor(MUTED,9);
   String footer;
   if(WiFi.status()!=WL_CONNECTED)footer="Wi-Fi reconnecting...";
   else if(!g.loaded)footer="Wi-Fi connected | Loading scores...";
   else if(!g.updated||g.error)footer="Feed unavailable | Retrying...";
   else if(!fresh)footer="STALE | Last update "+String((millis()-g.updated)/1000)+"s ago";
   else footer="Wi-Fi | Updated "+String((millis()-g.updated)/1000)+"s ago";
-  screen.drawString(footer,7,229,1);screen.drawRightString("ET",312,229,1);
-  screen.pushSprite(0,0);
+  screen.drawString(footer,10,307,1);screen.drawRightString("ET",468,307,1);
+  present();
 }
 
-void splash(String title,String line){screen.fillSprite(BG);centered(title,57,2);centered(line,92,2,MUTED);screen.pushSprite(0,0);}
+void splash(String title,String line){screen.fillSprite(BG);centered(title,57,2);centered(line,92,2,MUTED);present();}
 bool processSerial(){
   while(Serial.available()){
     char c=Serial.read();if(c=='\r')continue;
@@ -414,40 +412,45 @@ bool processSerial(){
           prefs.putString("ssid",d["ssid"].as<String>());prefs.putString("pass",d["password"].as<String>());
           serialLine="";Serial.println("WIFI_SAVED");return true;
         }
-      }else if(serialLine=="STATUS")Serial.printf("STATUS wifi=%d ip=%s heap=%u sport=%d panel=%s\n",WiFi.status(),WiFi.localIP().toString().c_str(),ESP.getFreeHeap(),selectedSport,stPanel?"ST7789":"ILI9341");
-      else if(serialLine=="PANEL ST7789"||serialLine=="PANEL ILI9341"){bool st=serialLine=="PANEL ST7789";prefs.putBool("st-panel",st);configurePanel(st);}
-      else if(serialLine.startsWith("INVERT ")){prefs.putBool("invert",serialLine.endsWith("1"));configurePanel(stPanel);}
-      else if(serialLine.startsWith("BGR ")){prefs.putBool("bgr",serialLine.endsWith("1"));configurePanel(stPanel);}
-      else if(serialLine=="CALIBRATE")prefs.putBool("cal-next",true);
+      }else if(serialLine=="STATUS")Serial.printf("STATUS wifi=%d ip=%s heap=%u sport=%d panel=ESP32-035 480x320\n",WiFi.status(),WiFi.localIP().toString().c_str(),ESP.getFreeHeap(),selectedSport);
+      else if(serialLine=="CALIBRATE")prefs.putBool("035cal",true);
+      else if(serialLine.startsWith("INVERT ")){prefs.putBool("035inv",serialLine.endsWith("1"));configurePanel();}
       serialLine="";
     }else if(serialLine.length()<256)serialLine+=c;else serialLine="";
   }return false;
 }
 void calibrate(){
-  int values[4];int xs[]={20,300},ys[]={20,220};
+  int values[4];const int xs[]={20,460},ys[]={20,300};
   for(int i=0;i<2;i++){
-    screen.fillSprite(BG);centered("TOUCH SETUP",86,2);centered("Press the cross firmly",112,2,MUTED);
-    screen.drawFastHLine(xs[i]-10,ys[i],21,TFT_WHITE);screen.drawFastVLine(xs[i],ys[i]-10,21,TFT_WHITE);screen.pushSprite(0,0);
-    while(touch.touched())delay(10);delay(150);
-    int64_t sx=0,sy=0;int n=0;while(n<12){processSerial();if(touch.touched()){auto p=touch.getPoint();if(p.z>200){sx+=p.x;sy+=p.y;n++;}}delay(15);}
-    values[2*i]=sx/n;values[2*i+1]=sy/n;
+    screen.fillSprite(BG);centered("TOUCH SETUP",125,2);centered("Press the cross firmly",150,2,MUTED);
+    screen.drawFastHLine(xs[i]-10,ys[i],21,WHITE);screen.drawFastVLine(xs[i],ys[i]-10,21,WHITE);present();
+    uint32_t deadline=millis()+45000;
+    while(touch.touched()&&(int32_t)(deadline-millis())>0)delay(10);
+    delay(150);int64_t sx=0,sy=0;int n=0;
+    while(n<12&&(int32_t)(deadline-millis())>0){
+      if(touch.touched()){auto p=touch.getPoint();if(p.z>200){sx+=p.x;sy+=p.y;n++;}}delay(15);
+    }
+    if(n<12){Serial.println("TOUCH_CALIBRATION_TIMEOUT");return;}
+    values[i*2]=sx/n;values[i*2+1]=sy/n;
   }
-  if(abs(values[2]-values[0])>500&&abs(values[3]-values[1])>500){
-    calX1=values[0]-(values[2]-values[0])*20/280;calX2=values[2]+(values[2]-values[0])*19/280;
-    calY1=values[1]-(values[3]-values[1])*20/200;calY2=values[3]+(values[3]-values[1])*19/200;
-    prefs.putInt("x1",calX1);prefs.putInt("x2",calX2);prefs.putInt("y1",calY1);prefs.putInt("y2",calY2);
-  }
-  prefs.putBool("cal-next",false);Serial.println("TOUCH_CALIBRATED");
+  if(abs(values[2]-values[0])<500||abs(values[3]-values[1])<500){Serial.println("TOUCH_CALIBRATION_REJECTED");return;}
+  calX1=values[0]-(values[2]-values[0])*20/440;calX2=values[2]+(values[2]-values[0])*19/440;
+  calY1=values[1]-(values[3]-values[1])*20/280;calY2=values[3]+(values[3]-values[1])*19/280;
+  prefs.putInt("035x1",calX1);prefs.putInt("035x2",calX2);prefs.putInt("035y1",calY1);prefs.putInt("035y2",calY2);
+  prefs.putBool("035cal",false);Serial.println("TOUCH_CALIBRATED");
 }
 void setup(){
-  Serial.begin(115200);pinMode(0,INPUT_PULLUP);pinMode(4,OUTPUT);pinMode(16,OUTPUT);pinMode(17,OUTPUT);
-  digitalWrite(4,HIGH);digitalWrite(16,HIGH);digitalWrite(17,HIGH);
-  prefs.begin("dawgs",false);
-  configurePanel(prefs.getBool("st-panel",true));pinMode(21,OUTPUT);digitalWrite(21,HIGH);
-  screen.setColorDepth(8);if(!screen.createSprite(320,240)){Serial.println("DISPLAY_MEMORY_ERROR");for(;;)delay(1000);}
-  touchSPI.begin(25,39,32,33);touch.begin(touchSPI);touch.setRotation(1);
+  Serial.begin(115200);pinMode(0,INPUT_PULLUP);
+  prefs.begin("dawgs",false);configurePanel();
+  screen.setColorDepth(4);
+  if(!screen.createSprite(DISPLAY_W,DISPLAY_H)){Serial.println("DISPLAY_MEMORY_ERROR");for(;;)delay(1000);}
+  screen.createPalette(PALETTE,16);
+  // Share TFT_eSPI's exact SPI instance; no second bus is reconfigured.
+  touch.begin(TFT_eSPI::getSPIinstance());touch.setRotation(1);
+  for(int pin:{4,16,17}){pinMode(pin,OUTPUT);digitalWrite(pin,HIGH);}
+  calX1=prefs.getInt("035x1",300);calX2=prefs.getInt("035x2",3700);
+  calY1=prefs.getInt("035y1",300);calY2=prefs.getInt("035y2",3700);
   modelMutex=xSemaphoreCreateMutex();
-  calX1=prefs.getInt("x1",200);calX2=prefs.getInt("x2",3700);calY1=prefs.getInt("y1",240);calY2=prefs.getInt("y2",3800);
   splash("GEORGIA BULLDOGS","Configuring Wi-Fi...");Serial.println("READY_CONFIG");
   uint32_t start=millis();uint32_t wait=prefs.getString("ssid").length()?2500:45000;
   while(millis()-start<wait){if(processSerial())break;delay(10);}
@@ -464,7 +467,7 @@ void setup(){
   }
   Serial.printf("WIFI_CONNECTED %d IP %s\n",WiFi.status()==WL_CONNECTED,WiFi.localIP().toString().c_str());
   configTzTime("EST5EDT,M3.2.0/2,M11.1.0/2","pool.ntp.org","time.nist.gov");
-  if(prefs.getBool("cal-next",false)||digitalRead(0)==LOW)calibrate();
+  if(!prefs.isKey("035x1")||prefs.getBool("035cal",false))calibrate();
   viewSince=millis();draw();xTaskCreatePinnedToCore(feedTask,"scores",24576,nullptr,1,nullptr,0);
   Serial.println("DASHBOARD_READY");
 }
@@ -473,10 +476,10 @@ void loop(){
   if(processSerial()){WiFi.disconnect();String s=prefs.getString("ssid"),p=prefs.getString("pass");WiFi.begin(s.c_str(),p.c_str());}
   if(digitalRead(0)==LOW){if(!bootStart)bootStart=millis();if(millis()-bootStart>2500){calibrate();bootStart=0;pressed=true;}}else bootStart=0;
   bool nowPressed=touch.touched();
-  if(nowPressed&&!pressed){auto p=touch.getPoint();if(p.z>200){int x=map(p.x,calX1,calX2,0,319),y=map(p.y,calY1,calY2,0,239);
-    if(y>=0&&y<46){
-      if(x>=0&&x<59){scheduleView=!scheduleView;scheduleUntil=millis()+7000;viewSince=millis();}
-      else if(x>=59&&x<275){selectedSport=(selectedSport+1)%3;manualSport=true;forceRefresh=true;scheduleView=false;viewSince=millis();Serial.printf("SELECT_SPORT %d\n",selectedSport);}
+  if(nowPressed&&!pressed){auto p=touch.getPoint();if(p.z>200){int x=map(p.x,calX1,calX2,0,479),y=map(p.y,calY1,calY2,0,319);
+    if(y>=0&&y<56){
+      if(x>=0&&x<70){scheduleView=!scheduleView;scheduleUntil=millis()+7000;viewSince=millis();}
+      else if(x>=70&&x<430){selectedSport=(selectedSport+1)%3;manualSport=true;forceRefresh=true;scheduleView=false;viewSince=millis();Serial.printf("SELECT_SPORT %d\n",selectedSport);}
     }
     pressed=true;
   }}

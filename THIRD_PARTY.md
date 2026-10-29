@@ -12,3 +12,8 @@ The Georgia G bitmap was resized from [FBS Logo Library](https://github.com/Lou3
 Game information is fetched from ESPN's public website JSON endpoints. These are not a documented supported API, and no availability or field completeness is guaranteed.
 
 The HTTPS certificate root embedded in `include/feed_ca.h` is a public certificate from the feed's verified certificate chain, not a credential or private key.
+
+
+## ESP32-035 migration
+
+Hardware pin mapping was checked against littleCdev/ESP32-035, Hardware.md. TFT_eSPI and Paul Stoffregen's XPT2046_Touchscreen library drive the shared SPI display and touch. The NV3041A initialization and Arduino_GFX dependency from the superseded ESP32-S3 migration are not used in this build.

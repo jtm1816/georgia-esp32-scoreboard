@@ -2,3 +2,4 @@ manifold3d
 trimesh
 numpy
 fonttools
+pillow
