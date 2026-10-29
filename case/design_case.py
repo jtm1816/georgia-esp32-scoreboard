@@ -1,4 +1,4 @@
-"""Parametric Georgia CYD enclosure. Run: pip install manifold3d trimesh numpy fonttools
+"""Parametric Georgia ESP32-035 enclosure. Run: pip install manifold3d trimesh numpy fonttools
 Then python design_case.py. All lengths are millimeters. See ASSEMBLY.md before printing.
 """
 from pathlib import Path
@@ -10,10 +10,10 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.basePen import BasePen
 
 OUT = Path(__file__).resolve().parent
-P = dict(board_w=86.0,board_h=50.0,board_thickness=1.6,hole_spacing_x=78.0,hole_spacing_y=42.0,
-         case_w=100.0,case_h=80.0,case_depth=24.0,wall=2.4,corner=6.0,
-         screen_window_w=60.0,screen_window_h=45.5,screen_pocket_w=70.6,screen_pocket_h=50.6,
-         board_front_z=5.8,insert_od=4.6,insert_length=4.0,insert_pocket_depth=4.3,
+P = dict(board_w=101.5,board_h=55.5,board_thickness=1.6,hole_spacing_x=94.5,hole_spacing_y=47.9,
+         case_w=125.0,case_h=88.0,case_depth=30.0,wall=2.4,corner=6.0,
+         screen_window_w=74.2,screen_window_h=49.6,screen_pocket_w=85.6,screen_pocket_h=56.1,
+         board_front_z=6.8,insert_od=4.6,insert_length=4.0,insert_pocket_depth=4.3,
          boss_od=7.2,screw_clearance=3.4,screw_head_d=6.2,screw_head_recess=1.8,
          usb_w=14.0,usb_h=5.5,usb_y=-12.0,tilt_from_vertical=30.0)
 if (OUT/'parameters.json').exists():P.update(json.loads((OUT/'parameters.json').read_text()))
@@ -77,7 +77,7 @@ def word(label,top):
         pen=OutlinePen(gs);gs[cmap[ord(c)]].draw(pen)
         cs=md.CrossSection(pen.contours,md.FillRule.EvenOdd).scale((scale,scale))
         cx=cur+adv/2;angle=(-cx if top else cx)/120*180/math.pi
-        baseline=(30-cx*cx/240) if top else (-37+cx*cx/240)
+        baseline=(35-cx*cx/300) if top else (-42+cx*cx/300)
         cs=cs.translate((-adv/2,0)).rotate(angle).translate((cx,baseline))
         out=out+cs;cur+=adv
     return out
@@ -111,14 +111,14 @@ port_world=box(P['usb_w'],40,P['usb_h'],port_center_z-P['usb_h']/2,0,port_back_y
 rear-=port_world.transform(inv)
 
 # Rear-only cradle; its front edge is trimmed behind the bezel bottom edge.
-stand=rr(94,74,4).extrude(3).translate((0,13,0))
+stand=rr(119,90,4).extrude(3).translate((0,17,0))
 back=P['case_depth']+0.35
 y0=-P['case_h']/2;y1=15
 front0=(s*y0+c*back,c*y0-s*back+lift)
 front1=(s*y1+c*back,c*y1-s*back+lift)
-profile=[(front0[0],2),(48,2),(48,5),front1,front0]
+profile=[(front0[0],2),(60,2),(60,5),front1,front0]
 brace=md.CrossSection([profile],md.FillRule.EvenOdd).extrude(6)
-for x in (-43,37):
+for x in (-55.5,49.5):
     stand+=brace.transform([[0,0,1,x],[1,0,0,0],[0,1,0,0]])
 # Solid lower plinth follows the underside of the tilted case down to the base.
 # Its front edge aligns with the bottom edge of the red bezel.
@@ -129,6 +129,9 @@ plinth_profile=[(bottom_front[0],2),(bottom_back[0],2),bottom_back,bottom_front]
 plinth=md.CrossSection([plinth_profile],md.FillRule.EvenOdd).extrude(P['case_w']-12)
 stand+=plinth.transform([[0,0,1,-(P['case_w']-12)/2],[1,0,0,0],[0,1,0,0]])
 stand-=box(200,200,200,-1,0,base_front-100)
+
+# Clearance for the lowered USB pad in the solid stand support.
+stand-=box(22.6,16.6,16.6,2.7,0,port_back_y-8)
 
 def mesh(shape):
     m=shape.simplify(0.005).to_mesh64();return trimesh.Trimesh(np.asarray(m.vert_properties)[:,:3],np.asarray(m.tri_verts),process=True)
@@ -155,7 +158,7 @@ for name,shape,color in [('red bezel',posed(bezel),[186,12,47,255]),('white lett
     m=mesh(shape);m.visual.vertex_colors=np.tile(color,(len(m.vertices),1));scene.add_geometry(m,node_name=name)
 scene.export(OUT/'case-assembly.glb')
 # Drawing-only screen reference; not included among printable parts.
-glass=posed(rr(59.5,45,1).extrude(.3).translate((0,0,1.8)))
+glass=posed(rr(73.44,48.96,1).extrude(.3).translate((0,0,1.8)))
 gm=mesh(glass);gm.visual.vertex_colors=np.tile([12,15,19,255],(len(gm.vertices),1));scene.add_geometry(gm,node_name='screen reference - do not print')
 scene.export(OUT/'case-assembly.glb')
 np.savez_compressed(OUT/'render-data.npz',**{
@@ -165,3 +168,7 @@ np.savez_compressed(OUT/'render-data.npz',**{
 (OUT/'parameters.json').write_text(json.dumps(P,indent=2)+'\n')
 (OUT/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps(report,indent=2))
+
+interference={'rear_vs_stand_mm3':float((posed(rear)^stand).volume()),'bezel_vs_stand_mm3':float((posed(bezel)^stand).volume())}
+(OUT/'assembly-clearance.json').write_text(json.dumps(interference,indent=2)+'\n')
+print(interference)
