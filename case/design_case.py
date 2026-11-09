@@ -81,7 +81,8 @@ def word(label,top):
         cs=cs.translate((-adv/2,0)).rotate(angle).translate((cx,baseline))
         out=out+cs;cur+=adv
     return out
-words=word('GEORGIA',True)+word('BULLDOGS',False)
+# Reverse the glyphs for the outward-facing side of the front bezel.
+words=(word('GEORGIA',True)+word('BULLDOGS',False)).mirror((1,0))
 letters=words.extrude(1.2).translate((0,0,-0.6))
 # Raised letters overlap the face by 0.6 mm and are fused to the bezel.
 bezel+=letters
@@ -89,7 +90,8 @@ bezel+=letters
 # Case leans 30 degrees back from vertical. In local case space +z is inward.
 a=math.radians(P['tilt_from_vertical']);s,c=math.sin(a),math.cos(a)
 lift=P['case_h']/2*c+P['case_depth']*s+3
-pose=np.array([[1,0,0,0],[0,s,c,0],[0,c,-s,lift]])
+# Proper rigid rotation: local +z points inward and +y up.
+pose=np.array([[-1,0,0,0],[0,s,c,0],[0,c,-s,lift]])
 def posed(shape):return shape.transform(pose)
 
 # Horizontal plug axis: vertical rear mounting pad, independent of screen tilt.

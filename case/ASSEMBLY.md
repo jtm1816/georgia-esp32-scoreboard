@@ -56,3 +56,7 @@ Edit parameters.json, then run design_case.py. Run render_preview.py for the CAD
 
 - [Supplied ESP32-035 dimensions](../docs/board-dimensions.png).
 - [ESP32-035 hardware mapping](https://github.com/littleCdev/ESP32-035/blob/master/Hardware.md).
+
+## Lettering orientation correction
+
+The raised lettering is reversed in the local front model so it reads correctly from the exterior of the finished bezel. The assembled preview uses a rigid rotation matching the printable part. Use the refreshed front STL and ZIP, replacing the earlier attached-lettering export.
