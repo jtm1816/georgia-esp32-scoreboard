@@ -17,7 +17,7 @@ def render(az,el,w=640,h=650):
     scale=min((w-65)/np.ptp(proj,axis=0)[0],(h-80)/np.ptp(proj,axis=0)[1]);mid=(proj.max(0)+proj.min(0))/2
     img=np.full((h,w,3),[238,238,236],dtype=np.uint8);depth=np.full((h,w),-np.inf)
     light=np.array([-.3,-.7,1.]);light/=np.linalg.norm(light)
-    for name in ['stand','rear','screen','bezel','letters']:
+    for name in ['rear','screen','bezel','letters']:
         v=data[name+'_vertices'];faces=data[name+'_faces'];base=data[name+'_color'].astype(float)
         if name in ['rear','stand']:base=np.array([53.,53.,56.])
         vv=v-center;px=(vv@right-mid[0])*scale+w/2;py=-(vv@up-mid[1])*scale+h/2;pz=vv@direction
@@ -47,6 +47,6 @@ def font(s,b=False):
 d.text((990,45),'GEORGIA | ESP32-035 3.5-INCH CASE',font=font(33,True),fill='#222222',anchor='mm')
 for i,(title,az,el) in enumerate([('Front / assembled',-70,20),('Straight-back USB-C power port',115,18),('30 degrees back from vertical',0,0)]):
     canvas.paste(render(az,el),(20+i*650,145));d.text((340+i*650,118),title,font=font(24),fill='#333333',anchor='mm')
-d.text((990,845),'Red bezel + white letters | Black shell and PETG stand | 125 x 88 x 30 mm body',font=font(23),fill='#333333',anchor='mm')
+d.text((990,845),'Attached raised letters | Black shell fused to stand | 125 x 88 x 30 mm body',font=font(23),fill='#333333',anchor='mm')
 d.text((990,888),'94.5 x 47.9 mm hole spacing | 14 x 5.5 mm power opening | Physical fit unverified',font=font(20),fill='#555555',anchor='mm')
 canvas.save(ROOT/'case-preview.png')

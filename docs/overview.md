@@ -62,3 +62,9 @@ The supplied dimensioned image gives a 101.5 x 55.5 mm board with 94.5 x 47.9 mm
 ## Hardware verification
 
 On October 29, 2026 the owner confirmed correct landscape colors and both touch controls on the ESP32-035. The upload verified successfully; Wi-Fi connected and the football feed returned data. Printed case fit is still unverified.
+
+## Attached case parts - November 9, 2026
+
+The lettering is now fused to the front bezel as raised geometry. The rear shell and stand are one permanent print, joined by reinforced ribs with screwdriver access retained. Print the front red and switch to white PETG for the final raised-letter layers; print the combined rear/stand black. The bundle now contains two STL files. See the assembly guide for orientation and support changes. Printed fit and joint strength remain unverified.
+
+The rear USB-C adapter and wiring channel are now offset toward the board USB side (35 mm left of center viewed from the front). The front of the stand is closed; the cable enters only from the rear.

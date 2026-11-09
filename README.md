@@ -50,7 +50,13 @@ Download the [case print files](case/georgia-case-print-files.zip) or read [asse
 - Uploaded to the ESP32-D0WD-V3 / 4 MB ESP32-035 over COM13 at 460800 baud; flash hashes verified.
 - The owner confirmed readable 480 x 320 landscape, correct red/black/white colors, sport switching, and G schedule/automatic-return touch controls.
 - Serial status confirmed Wi-Fi connected and the football feed returned successfully. No Wi-Fi password is included in these files.
-- All four case STLs pass closed, positive-volume solid checks. Case/stand intersections are zero within numerical tolerance.
+- Both current case STLs pass closed, positive-volume solid checks. Case/stand intersections are zero within numerical tolerance.
 - Printed fit, glass/PCB stack assumptions, insert fit and adapter retention remain unverified. Live possession/timeout/bonus indicators depend on future live-game feed data and have not all been observed on the new hardware.
 
 ESPN website JSON feeds are unofficial and may omit possession, timeouts, bonus, counts or plays. Missing fields remain unavailable. The Georgia marks belong to their owner; asset attribution is retained in THIRD_PARTY.md.
+
+## Attached case parts - November 9, 2026
+
+The lettering is now fused to the front bezel as raised geometry. The rear shell and stand are one permanent print, joined by reinforced ribs with screwdriver access retained. Print the front red and switch to white PETG for the final raised-letter layers; print the combined rear/stand black. The bundle now contains two STL files. See the assembly guide for orientation and support changes. Printed fit and joint strength remain unverified.
+
+The rear USB-C adapter and wiring channel are now offset toward the board USB side (35 mm left of center viewed from the front). The front of the stand is closed; the cable enters only from the rear.
