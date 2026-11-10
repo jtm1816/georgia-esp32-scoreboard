@@ -8,3 +8,7 @@
 - Owner confirmed correct red header, black background, white text, landscape, sport selection and G schedule/return controls.
 - Display registers returned ID04=ffffffff and IDD3=00000000, so the exact panel IC is not established by readback. This ST7796-compatible build is visually verified on the pictured board.
 - Board dimensions and hole centers follow the supplied 101.5 x 55.5 / 94.5 x 47.9 mm drawing. Meshes validated digitally; printed fit has not been tested.
+
+## November 10, 2026 - rotated display
+
+Uploaded the 180-degree rotated build to COM8 and verified the application flash hash. TFT rotation is 3; touch raw rotation remains 1 and mapped coordinates are reversed on both axes. Existing calibration is retained. Owner confirmed the requested screen direction and correct G and sport-selector response. Serial confirmed Wi-Fi reconnected and DASHBOARD_READY.

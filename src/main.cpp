@@ -37,7 +37,7 @@ uint32_t scheduleUntil=0, viewSince=0;
 
 void configurePanel(){
   pinMode(33,OUTPUT);digitalWrite(33,HIGH);
-  tft.init();tft.setRotation(1);tft.invertDisplay(prefs.getBool("035inv",false));
+  tft.init();tft.setRotation(3);tft.invertDisplay(prefs.getBool("035inv",false));
   pinMode(27,OUTPUT);digitalWrite(27,HIGH);tft.fillScreen(BG);
   Serial.printf("PANEL ESP32-035 %dx%d ID04=%08lx IDD3=%08lx\n",tft.width(),tft.height(),tft.readcommand32(0x04),tft.readcommand32(0xd3));
 }
@@ -433,6 +433,8 @@ void calibrate(){
     if(n<12){Serial.println("TOUCH_CALIBRATION_TIMEOUT");return;}
     values[i*2]=sx/n;values[i*2+1]=sy/n;
   }
+  // Store calibration in the original touch orientation, independent of display flip.
+  std::swap(values[0],values[2]);std::swap(values[1],values[3]);
   if(abs(values[2]-values[0])<500||abs(values[3]-values[1])<500){Serial.println("TOUCH_CALIBRATION_REJECTED");return;}
   calX1=values[0]-(values[2]-values[0])*20/440;calX2=values[2]+(values[2]-values[0])*19/440;
   calY1=values[1]-(values[3]-values[1])*20/280;calY2=values[3]+(values[3]-values[1])*19/280;
@@ -446,6 +448,7 @@ void setup(){
   if(!screen.createSprite(DISPLAY_W,DISPLAY_H)){Serial.println("DISPLAY_MEMORY_ERROR");for(;;)delay(1000);}
   screen.createPalette(PALETTE,16);
   // Share TFT_eSPI's exact SPI instance; no second bus is reconfigured.
+  // Keep touch raw orientation stable so saved calibration remains valid.
   touch.begin(TFT_eSPI::getSPIinstance());touch.setRotation(1);
   for(int pin:{4,16,17}){pinMode(pin,OUTPUT);digitalWrite(pin,HIGH);}
   calX1=prefs.getInt("035x1",300);calX2=prefs.getInt("035x2",3700);
@@ -476,7 +479,7 @@ void loop(){
   if(processSerial()){WiFi.disconnect();String s=prefs.getString("ssid"),p=prefs.getString("pass");WiFi.begin(s.c_str(),p.c_str());}
   if(digitalRead(0)==LOW){if(!bootStart)bootStart=millis();if(millis()-bootStart>2500){calibrate();bootStart=0;pressed=true;}}else bootStart=0;
   bool nowPressed=touch.touched();
-  if(nowPressed&&!pressed){auto p=touch.getPoint();if(p.z>200){int x=map(p.x,calX1,calX2,0,479),y=map(p.y,calY1,calY2,0,319);
+  if(nowPressed&&!pressed){auto p=touch.getPoint();if(p.z>200){int x=479-map(p.x,calX1,calX2,0,479),y=319-map(p.y,calY1,calY2,0,319);
     if(y>=0&&y<56){
       if(x>=0&&x<70){scheduleView=!scheduleView;scheduleUntil=millis()+7000;viewSince=millis();}
       else if(x>=70&&x<430){selectedSport=(selectedSport+1)%3;manualSport=true;forceRefresh=true;scheduleView=false;viewSince=millis();Serial.printf("SELECT_SPORT %d\n",selectedSport);}

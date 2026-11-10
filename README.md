@@ -60,3 +60,7 @@ ESPN website JSON feeds are unofficial and may omit possession, timeouts, bonus,
 The lettering is now fused to the front bezel as raised geometry. The rear shell and stand are one permanent print, joined by reinforced ribs with screwdriver access retained. Print the front red and switch to white PETG for the final raised-letter layers; print the combined rear/stand black. The bundle now contains two STL files. See the assembly guide for orientation and support changes. Printed fit and joint strength remain unverified.
 
 The rear USB-C adapter and wiring channel are now offset toward the board USB side (35 mm left of center viewed from the front). The front of the stand is closed; the cable enters only from the rear.
+
+## Display orientation - November 10, 2026
+
+The display is flipped 180 degrees from the initially verified orientation (TFT rotation 3). Touch coordinates are reversed on both axes, while the raw touch orientation and existing calibration keys are retained. Recalibration stores measurements in that same original raw orientation. The rotated firmware upload hash was verified on November 10, 2026. The owner confirmed the desired screen direction and correct G/sport-selector touch response; Wi-Fi reconnected successfully.
