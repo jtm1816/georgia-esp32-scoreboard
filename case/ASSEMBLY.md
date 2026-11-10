@@ -1,78 +1,62 @@
-# Georgia scoreboard case — design revision 6
+# Georgia ESP32-035 case - attached parts revision, November 9, 2026
 
-![Actual CAD geometry](case-preview.png)
+![CAD assembly](case-preview.png)
 
-## Parts and colors
+## Two printed parts
 
-| File | Color | Quantity |
+| File | Print color | Description |
 | --- | --- | --- |
-| front-bezel-red.stl | Red | 1 |
-| lettering-white.stl | White | 1 set of 15 letters |
-| rear-shell-black.stl | Black | 1 |
-| stand-black.stl | Black | 1 |
+| front-bezel-with-lettering.stl | Red, then white for raised letters | Bezel and GEORGIA/BULLDOGS letters are one connected solid |
+| rear-shell-and-stand.stl | Black | Rear shell, support ribs and flat stand are permanently fused into one connected solid |
 
-The bezel has no stylus holder. The black cradle holds the screen 30 degrees back from vertical (60 degrees above the desk). The case body is 100 � 80 � 24 mm. A solid black lower plinth fills the gap from the bottom of the bezel to the flat base. Its front edge aligns with the lower bezel edge, with no projecting front tray.
+There are no loose letters or separate stand. The front still unscrews for board access. The rear/stand joint is reinforced by two 6 mm wide ribs bridging the former cradle gap. Four 7 mm screwdriver channels preserve access to the rear screw heads. The USB-C opening remains horizontal, facing straight backward parallel to the desk, at base level. The lower front gap remains filled, with a solid front face and no USB tunnel opening. The USB adapter and its internal clearance channel are offset 35 mm toward the left when viewed from the display side, closer to the onboard USB connector.
 
-## Hardware assumptions — check against your actual parts
+## ESP32-035 hardware assumptions
 
-- PCB outline: 86 × 50 mm; PCB thickness: 1.6 mm.
-- Four mounting holes: 78 × 42 mm center spacing, nominal 3.2 mm board-hole diameter.
-- Screen assembly: approximately 70 × 50 mm and 4 mm above the PCB. Visible front opening: 60 × 45.5 mm. The screen pocket is centered; actual board revisions may have different offsets or display dimensions.
-- Four **M3 heat-set inserts, 4.6 mm outside diameter × 4.0 mm long**. The model uses 4.6 mm pilot pockets, 4.3 mm deep, in 7.2 mm bosses. Insert suppliers specify their own pilot sizes; adjust `insert_od` to the supplier's recommended pilot diameter. Do not use longer inserts in these blind pockets without redesigning the boss stack.
-- Four **M3 × 20 mm button-head screws**. Rear head pockets are 6.2 mm diameter × 1.8 mm deep. Verify actual screw-head dimensions and insertion depth; screws must not bottom out in the inserts.
-- Rear USB-C opening: **14 mm wide x 5.5 mm tall**, horizontal, with no extra clearance. A vertical mounting pad rests on the 3 mm flat base, so the cable enters straight backward parallel to the desk. An internal recess leaves a 2.4 mm mounting face. Adapter retention and internal wiring clearance need checking against the actual adapter.
+- Board outline: 101.5 x 55.5 mm. Four mounting holes (assumed 3.2 mm; the supplied drawing does not label their diameter) at 94.5 x 47.9 mm center spacing, per the supplied board diagram.
+- Body: 125 x 88 x 30 mm. Stand: 119 mm wide, approximately 84 mm deep after front trimming. Fixed 30-degree tilt back from vertical.
+- Visible window: 74.2 x 49.6 mm around an assumed 73.44 x 48.96 mm active area; this active-area size is not dimensioned on the supplied image. Provisional centered glass pocket: 85.6 x 56.1 mm, based on the 85 mm glass width and full-board height shown. Measure the actual glass outline and offset before printing.
+- PCB thickness 1.6 mm and front PCB plane 6.8 mm behind the bezel face are provisional. The pocket floor is 1.8 mm behind the front; this allows a nominal 5 mm screen stack. Do not clamp the screen if the actual stack differs.
+- Four M3 heat-set inserts: assumed 4.6 mm outside diameter x 4 mm long, in 4.6 mm pilot pockets 4.3 mm deep. Use the insert supplier's recommended pilot size, adjusting `insert_od` as needed.
+- Four M3 x 25 mm button-head screws are suggested for this deeper case, assuming 6.2 mm diameter x 1.8 mm head recesses. Check screw length against the actual assembled stack so screws engage the inserts without bottoming out.
+- USB-C adapter opening: exactly 14 mm wide x 5.5 mm tall, with no added clearance. The vertical mounting face is 2.4 mm thick and the pad rests at base level. A stand recess clears the lowered pad. Adapter retention clips, flange size, solder pads, cable bend space, and internal wiring fit remain unverified.
+- The board diagram shows edge USB, SD, switches and connectors. The larger cavity leaves space around the PCB but does not provide outside access cutouts to every board connector. Open the shell for programming, SD or button access. No battery or speaker is included in this design.
 
-The user elected to skip the mounting-hole fit-check print. These files use published dimensions; no physical fit or load testing has been performed. Digital solid checks do not prove hardware fit.
+No physical fit, load, or print test has been performed on the new case. Do not reuse the old 2.8-inch case dimensions. Digital mesh and interference checks do not establish hardware fit.
 
-## PETG printing recommendations
+## PETG printing and attached white letters
 
-Use red PETG for the bezel, white PETG for the lettering, and black PETG for the shell and stand. These are starting settings, not a tested printer profile. Use your filament maker's temperature profile and dry filament as directed.
+Use PETG for both parts. Start with a 0.4 mm nozzle, 0.20 mm layers, 4 walls, 5 top/bottom layers and 20-30% gyroid infill. Use the filament maker's temperature profile and a PETG-compatible bed surface. These are starting settings, not a printer-tested profile.
 
-For a 0.4 mm nozzle, start with 0.20 mm layers, 4 walls, 5 top/bottom layers, and 20-30% gyroid infill. Print the small white letters at 0.12-0.16 mm layers if desired. Use a 3-5 mm brim where adhesion is limited, especially for the lettering. Use a PETG-compatible build surface; follow its maker's release-layer instructions.
+**Front:** the supplied STL is oriented with the insert-boss ends at the bed and the raised lettering facing upward. Its total height is 7.4 mm. The main front face ends at Z=6.8 mm; only the letters extend from 6.8 to 7.4 mm. Print red first, then use a slicer filament-change pause at the first letter-only layer above 6.8 mm to change to white PETG. Check the layer preview; layer numbering depends on first-layer height. White letters bond directly to the red bezel during printing. Painting the raised letters is also possible. STL files contain geometry only; the white preview is a suggested color assignment.
 
-| Part | Orientation | Supports |
-| --- | --- | --- |
-| Red bezel | Front face down, bosses up | Off initially. Inspect the shallow lettering-pocket bridges and screen pocket in the slicer. Keep support out of insert pockets. |
-| White letters | Flat, supplied orientation | Off. Print slowly and keep the matching layout for assembly. |
-| Black rear shell | Supplied orientation, projecting USB pad lowest | Normal/snug supports under the elevated rear face; allow supports from model surfaces where needed inside the port pad. Use manual painting to cover unsupported pad ceilings. Avoid filling screw bores with support. |
-| Black stand | Flat base down | Off initially. Inspect brace slopes and the top of the solid lower support for unsupported toolpaths. |
+The front needs removable supports under the broad inside/back surface because it starts on its bosses. Paint supports on the rear of the bezel and keep them out of insert pockets and the display opening. Remove support residue before seating the PCB. A 3-5 mm brim around the boss footprints can help adhesion. Do not use the former face-down orientation: attached letters are now raised beyond the face.
 
-For PETG supporting PETG, start with a **0.30 mm top Z gap**, **0.30 mm bottom Z gap**, **0.6 mm XY separation**, **3 interface layers**, **80% interface density**, and **12-15% support density**. Use a 45-degree overhang threshold measured from the horizontal; slicers use different angle conventions. These values trade underside finish for easier removal. Slicers may round Z gaps to layer increments, so inspect the effective gap. Do not use a zero Z gap for same-material supports. Add local supports only where the preview shows they are needed, and ensure they remain removable through the open shell.
+**Rear and stand:** print the flat base on the bed in the supplied assembled orientation. The fixed 30-degree screen tilt is built into the solid. Check the top rim/roof of the open shell, USB adapter recess, and screw-access channels for unsupported spans. Use normal/snug or painted supports where needed, including from model surfaces if needed inside the shell. Keep supports removable through the large front opening; avoid packing the screw bores and USB-C opening. Printing the rear face flat is no longer possible because the stand is integral.
 
-The rear shell is the most support-dependent part. Preview every layer around the vertical USB-C mounting pad; the opening must stay 14 x 5.5 mm after cleanup. A side orientation may reduce the broad supported rear surface but increases shell height and may need a brim. No orientation has been physically tested.
-
-Import all STLs in millimeters at 100%. Each file's lowest point is at the bed. Letter pockets have approximately 0.12 mm side clearance and seat 0.6 mm deep, leaving the letters 0.6 mm raised. Use suitable adhesive if needed.
-
-Sources: [Prusa PETG material guide](https://help.prusa3d.com/article/petg_2059) and [Sovol support settings guide](https://www.sovol3d.com/blogs/news/3d-printing-support-settings-explained-how-to-get-cleaner-easier-to-remove-fdm-prints). Part orientations and support placements above are design-specific recommendations based on this CAD geometry.
+For PETG supporting PETG, initial values are a 0.30 mm top/bottom Z gap, 0.6 mm XY separation, 3 interface layers, about 80% interface density and 12-15% support density. Inspect the effective gaps in the slicer, since some round them to full layers. Do not use a zero gap with same-material supports. Final orientations, support removal and print strength remain untested.
 
 ## Assembly
 
-1. Install the white GEORGIA and BULLDOGS letters into their matching recesses on the front bezel.
-2. Install the four M3 inserts from the **inside/rear** of the front bezel. Keep them coaxial and flush with the boss tops; protect the thin front skin from excess heat or insertion force.
-3. Install the USB-C power adapter in the rear opening, and provide internal strain relief appropriate to its actual body. The model supplies the opening, not custom latches for an unspecified adapter.
-4. With USB disconnected, connect the adapter's regulated 5 V and ground to the board's 5 V/VIN and GND. This port is power only. Identify the actual board connections before wiring.
-5. Seat the board screen-first into the bezel pocket. The four front bosses support the PCB around its mounting holes; the display must not bear screw-clamping force.
-6. Place the black rear shell over the board. Its hollow support columns contact the rear of the PCB at the same four mounting holes.
-7. Insert each rear screw along the shared axis: **rear screw → rear support column → PCB hole → front heat-set insert**. Tighten only until seated. The screws must neither bend the PCB nor press the screen against the bezel.
-8. Seat the assembled case against the black cradle's rear side braces, which set the 30-degree angle. The solid lower plinth supports the case underside. Secure the shell to the two rear braces with suitable adhesive or thin mounting tape so it cannot slide forward when tapped. Keep the rear screws and USB opening clear.
-9. Remove the rear shell when access to BOOT, RESET, or the original USB programming socket is needed.
+1. Print the front with attached raised letters and the combined black rear/stand. Remove supports and inspect all holes, the display pocket and USB-C opening.
+2. Install four M3 heat-set inserts from the inside/rear of the front bezel, flush with boss tops. Match insert dimensions to the assumptions below and protect the thin front face from overheating.
+3. Install the USB-C power-only adapter in the combined rear/stand. Confirm flange/clip fit and provide suitable internal strain relief.
+4. With USB disconnected, connect the adapter's regulated 5 V and ground to the board's identified 5 V/VIN and GND. The case opening does not supply voltage regulation or USB-C power negotiation.
+5. Seat the board screen-first in the front pocket, with the PCB holes on the insert bosses. Verify that the display is not carrying screw-clamping force.
+6. Fit the front/PCB into the combined rear/stand and insert the four rear screws along the original shared axes: screw, rear column, PCB hole, front insert. The extended channels allow screwdriver access through the stand braces. Tighten only until seated; screws must not bottom out or bend the PCB.
+7. The rear shell is already attached permanently to the stand. No stand adhesive or attachment operation is required. Unscrew and lift off the front for board connector, BOOT, RESET or SD access.
 
-## Editable source
+## Validation and source
 
-`parameters.json` contains the dimensions. `design_case.py` regenerates the STLs and the colored `case-assembly.glb` preview. Install Python dependencies with:
+Both STL files are closed, positive-volume meshes with exactly one connected solid each. Front and combined rear/stand have no meaningful CAD intersection. Lettering overlaps the front face by 0.6 mm before the Boolean union; it is not a separate set of glyphs. The joint ribs overlap both the shell and stand. No physical print-fit or strength test has been performed.
 
-```text
-pip install manifold3d trimesh numpy fonttools
-python design_case.py
-```
-
-The lettering uses Arial Black when available. On other systems, set `GEORGIA_CASE_FONT` to a bold TrueType font path before regenerating. A different font changes the letter pockets, so always regenerate the bezel and lettering together.
-
-`case-assembly.glb` is for viewing the assembled design; it includes non-printable screen reference. Print the individual STLs. `validation.json` records digital mesh checks, not a physical-fit certificate.
+Edit parameters.json, then run design_case.py. Run render_preview.py for the CAD preview. Install requirements.txt first. Arial Black is used when available; GEORGIA_CASE_FONT can select another bold TrueType font. The GLB is a colored viewing model and includes a non-printable screen reference. Print only the two named STLs.
 
 ## References
 
-- [Manufacturer specifications, mounting drawing on page 6](https://mischianti.org/wp-content/uploads/2025/04/ESP32-2432S028-Specifications-EN.pdf)
-- [Element14 board dimensions and technical drawing](https://community.element14.com/technologies/embedded/b/blog/posts/esp32-cheap-yellow-display-cyd-guide-with-a-jellyfish-example)
+- [Supplied ESP32-035 dimensions](../docs/board-dimensions.png).
+- [ESP32-035 hardware mapping](https://github.com/littleCdev/ESP32-035/blob/master/Hardware.md).
 
-The Element14 drawing is approximate and describes a different USB-port revision; board geometry must be checked against the actual hardware.
+## Lettering orientation correction
+
+The raised lettering is reversed in the local front model so it reads correctly from the exterior of the finished bezel. The assembled preview uses a rigid rotation matching the printable part. Use the refreshed front STL and ZIP, replacing the earlier attached-lettering export.

@@ -1,4 +1,4 @@
-"""Parametric Georgia CYD enclosure. Run: pip install manifold3d trimesh numpy fonttools
+"""Parametric Georgia ESP32-035 enclosure. Run: pip install manifold3d trimesh numpy fonttools
 Then python design_case.py. All lengths are millimeters. See ASSEMBLY.md before printing.
 """
 from pathlib import Path
@@ -10,12 +10,12 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.basePen import BasePen
 
 OUT = Path(__file__).resolve().parent
-P = dict(board_w=86.0,board_h=50.0,board_thickness=1.6,hole_spacing_x=78.0,hole_spacing_y=42.0,
-         case_w=100.0,case_h=80.0,case_depth=24.0,wall=2.4,corner=6.0,
-         screen_window_w=60.0,screen_window_h=45.5,screen_pocket_w=70.6,screen_pocket_h=50.6,
-         board_front_z=5.8,insert_od=4.6,insert_length=4.0,insert_pocket_depth=4.3,
+P = dict(board_w=101.5,board_h=55.5,board_thickness=1.6,hole_spacing_x=94.5,hole_spacing_y=47.9,
+         case_w=125.0,case_h=88.0,case_depth=30.0,wall=2.4,corner=6.0,
+         screen_window_w=74.2,screen_window_h=49.6,screen_pocket_w=85.6,screen_pocket_h=56.1,
+         board_front_z=6.8,insert_od=4.6,insert_length=4.0,insert_pocket_depth=4.3,
          boss_od=7.2,screw_clearance=3.4,screw_head_d=6.2,screw_head_recess=1.8,
-         usb_w=14.0,usb_h=5.5,usb_y=-12.0,tilt_from_vertical=30.0)
+         usb_w=14.0,usb_h=5.5,usb_y=-12.0,usb_x=-35.0,tilt_from_vertical=30.0)
 if (OUT/'parameters.json').exists():P.update(json.loads((OUT/'parameters.json').read_text()))
 
 def rr(w,h,r):
@@ -77,18 +77,21 @@ def word(label,top):
         pen=OutlinePen(gs);gs[cmap[ord(c)]].draw(pen)
         cs=md.CrossSection(pen.contours,md.FillRule.EvenOdd).scale((scale,scale))
         cx=cur+adv/2;angle=(-cx if top else cx)/120*180/math.pi
-        baseline=(30-cx*cx/240) if top else (-37+cx*cx/240)
+        baseline=(35-cx*cx/300) if top else (-42+cx*cx/300)
         cs=cs.translate((-adv/2,0)).rotate(angle).translate((cx,baseline))
         out=out+cs;cur+=adv
     return out
-words=word('GEORGIA',True)+word('BULLDOGS',False)
+# Reverse the glyphs for the outward-facing side of the front bezel.
+words=(word('GEORGIA',True)+word('BULLDOGS',False)).mirror((1,0))
 letters=words.extrude(1.2).translate((0,0,-0.6))
-bezel-=words.offset(.12,circular_segments=16).extrude(.75).translate((0,0,-.1))
+# Raised letters overlap the face by 0.6 mm and are fused to the bezel.
+bezel+=letters
 
 # Case leans 30 degrees back from vertical. In local case space +z is inward.
 a=math.radians(P['tilt_from_vertical']);s,c=math.sin(a),math.cos(a)
 lift=P['case_h']/2*c+P['case_depth']*s+3
-pose=np.array([[1,0,0,0],[0,s,c,0],[0,c,-s,lift]])
+# Proper rigid rotation: local +z points inward and +y up.
+pose=np.array([[-1,0,0,0],[0,s,c,0],[0,c,-s,lift]])
 def posed(shape):return shape.transform(pose)
 
 # Horizontal plug axis: vertical rear mounting pad, independent of screen tilt.
@@ -98,27 +101,27 @@ port_center_z=3.0+8.0  # pad bottom rests on the 3 mm stand base
 port_local_y=(port_center_z+s*P['case_depth']-lift)/c
 port_center_y=s*port_local_y+c*P['case_depth']
 port_back_y=port_center_y+8.0
-pad_world=box(22,16,16,port_center_z-8,0,port_back_y-8)
+pad_world=box(22,16,16,port_center_z-8,P['usb_x'],port_back_y-8)
 pad_local=pad_world.transform(inv)
 # Limit the pad to the outside of the inner rear wall, preserving the cavity.
 pad_local=pad_local ^ box(200,200,80,P['case_depth']-P['wall'])
 rear+=pad_local
 # Hollow the pad from inside so the adapter seats in a 2.4 mm vertical face.
-recess_world=box(18,40,12,port_center_z-6,0,port_back_y-P['wall']-20)
+recess_world=box(18,40,12,port_center_z-6,P['usb_x'],port_back_y-P['wall']-20)
 rear-=recess_world.transform(inv)
 # Exact 14 x 5.5 opening; cable enters horizontally, parallel to the desk.
-port_world=box(P['usb_w'],40,P['usb_h'],port_center_z-P['usb_h']/2,0,port_back_y-16)
+port_world=box(P['usb_w'],40,P['usb_h'],port_center_z-P['usb_h']/2,P['usb_x'],port_back_y-16)
 rear-=port_world.transform(inv)
 
 # Rear-only cradle; its front edge is trimmed behind the bezel bottom edge.
-stand=rr(94,74,4).extrude(3).translate((0,13,0))
+stand=rr(119,90,4).extrude(3).translate((0,17,0))
 back=P['case_depth']+0.35
 y0=-P['case_h']/2;y1=15
 front0=(s*y0+c*back,c*y0-s*back+lift)
 front1=(s*y1+c*back,c*y1-s*back+lift)
-profile=[(front0[0],2),(48,2),(48,5),front1,front0]
+profile=[(front0[0],2),(60,2),(60,5),front1,front0]
 brace=md.CrossSection([profile],md.FillRule.EvenOdd).extrude(6)
-for x in (-43,37):
+for x in (-55.5,49.5):
     stand+=brace.transform([[0,0,1,x],[1,0,0,0],[0,1,0,0]])
 # Solid lower plinth follows the underside of the tilted case down to the base.
 # Its front edge aligns with the bottom edge of the red bezel.
@@ -130,38 +133,58 @@ plinth=md.CrossSection([plinth_profile],md.FillRule.EvenOdd).extrude(P['case_w']
 stand+=plinth.transform([[0,0,1,-(P['case_w']-12)/2],[1,0,0,0],[0,1,0,0]])
 stand-=box(200,200,200,-1,0,base_front-100)
 
-def mesh(shape):
-    m=shape.simplify(0.005).to_mesh64();return trimesh.Trimesh(np.asarray(m.vert_properties)[:,:3],np.asarray(m.tri_verts),process=True)
+# Clearance for the lowered USB pad in the solid stand support.
+stand-=box(22.6,16.6,16.6,2.7,P['usb_x'],port_back_y-8)
 
+def mesh(shape):
+    raw=shape.simplify(0.005).to_mesh64()
+    result=trimesh.Trimesh(np.asarray(raw.vert_properties)[:,:3].astype(np.float32).astype(float),np.asarray(raw.tri_verts),process=True)
+    result.update_faces(result.nondegenerate_faces(height=1e-6))
+    result.remove_unreferenced_vertices()
+    with np.errstate(invalid='ignore',divide='ignore'):
+        parts=result.split(only_watertight=False)
+    parts=[part for part in parts if not (len(part.faces)<=2 and abs(part.volume)<1e-6)]
+    return trimesh.util.concatenate(parts) if parts else result
+
+# Permanently fused shell/stand. These ribs bridge the former 0.35 mm cradle gap.
+for x in (-52.5,52.5):
+    stand+=posed(box(6,55,1.8,P['case_depth']-1,x,-12.5))
+rear_stand=posed(rear)+stand
+# Keep straight screwdriver access to all rear screws after fusing the cradle.
+for x,y in holes:
+    rear_stand-=posed(cyl(7.0,100,P['case_depth'],x,y))
 models={
- 'front-bezel-red.stl':bezel,
- 'lettering-white.stl':letters.translate((0,0,.6)),
- 'rear-shell-black.stl':rear.rotate((180,0,0)).translate((0,0,P['case_depth'])),
- 'stand-black.stl':stand,
+ 'front-bezel-with-lettering.stl':bezel.rotate((180,0,0)),
+ 'rear-shell-and-stand.stl':rear_stand,
 }
+
 report={}
 for name,shape in models.items():
     m=mesh(shape)
     m.apply_translation((0,0,-m.bounds[0,2]))
-    if not m.is_watertight or m.volume<=0:raise RuntimeError(f'Invalid solid: {name}')
+    if not m.is_watertight or m.volume<=0 or len(m.split())!=1:raise RuntimeError(f'Invalid or disconnected solid: {name}')
     m.export(OUT/name)
     report[name]={'watertight':bool(m.is_watertight),'volume_mm3':round(float(m.volume),2),
                   'bounds_mm':np.round(m.bounds,3).tolist(),'components':len(m.split())}
 
 # A colored assembly, for viewing only. Individual STLs are already print-oriented.
 scene=trimesh.Scene()
-for name,shape,color in [('red bezel',posed(bezel),[186,12,47,255]),('white lettering',posed(letters),[245,245,245,255]),
-                         ('black rear',posed(rear),[30,30,32,255]),('black stand',stand,[30,30,32,255])]:
+for name,shape,color in [('red bezel',posed(bezel-letters),[186,12,47,255]),('white lettering',posed(letters),[245,245,245,255]),
+                         ('black rear and stand',rear_stand,[30,30,32,255])]:
     m=mesh(shape);m.visual.vertex_colors=np.tile(color,(len(m.vertices),1));scene.add_geometry(m,node_name=name)
 scene.export(OUT/'case-assembly.glb')
 # Drawing-only screen reference; not included among printable parts.
-glass=posed(rr(59.5,45,1).extrude(.3).translate((0,0,1.8)))
+glass=posed(rr(73.44,48.96,1).extrude(.3).translate((0,0,1.8)))
 gm=mesh(glass);gm.visual.vertex_colors=np.tile([12,15,19,255],(len(gm.vertices),1));scene.add_geometry(gm,node_name='screen reference - do not print')
 scene.export(OUT/'case-assembly.glb')
 np.savez_compressed(OUT/'render-data.npz',**{
-    key:val for name,shape,color in [('bezel',posed(bezel),[186,12,47]),('letters',posed(letters),[245,245,245]),
-        ('rear',posed(rear),[30,30,32]),('stand',stand,[30,30,32]),('screen',glass,[12,15,19])]
+    key:val for name,shape,color in [('bezel',posed(bezel-letters),[186,12,47]),('letters',posed(letters),[245,245,245]),
+        ('rear',rear_stand,[30,30,32]),('stand',md.Manifold(),[30,30,32]),('screen',glass,[12,15,19])]
     for key,val in [(name+'_vertices',mesh(shape).vertices),(name+'_faces',mesh(shape).faces),(name+'_color',color)]})
 (OUT/'parameters.json').write_text(json.dumps(P,indent=2)+'\n')
 (OUT/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps(report,indent=2))
+
+interference={'front_vs_rear_stand_mm3':float((posed(bezel)^rear_stand).volume()),'usb_exit_blocked_mm3':float((box(P['usb_w'],10,P['usb_h'],port_center_z-P['usb_h']/2,P['usb_x'],port_back_y+5)^rear_stand).volume())}
+(OUT/'assembly-clearance.json').write_text(json.dumps(interference,indent=2)+'\n')
+print(interference)
