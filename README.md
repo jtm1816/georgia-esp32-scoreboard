@@ -64,3 +64,7 @@ The rear USB-C adapter and wiring channel are now offset toward the board USB si
 ## Display orientation - November 10, 2026
 
 The display is flipped 180 degrees from the initially verified orientation (TFT rotation 3). Touch coordinates are reversed on both axes, while the raw touch orientation and existing calibration keys are retained. Recalibration stores measurements in that same original raw orientation. The rotated firmware upload hash was verified on November 10, 2026. The owner confirmed the desired screen direction and correct G/sport-selector touch response; Wi-Fi reconnected successfully.
+
+## Screen and insert fit corrections - November 13, 2026
+
+The front opening is now **80.4 mm wide x 49.6 mm high**, shifted **1 mm right when viewed from the front**, following the owner's measured 80 mm viewable width. Height remains unchanged. The four insert pilot holes are reduced to **4.0 mm** for **4.2 mm outside-diameter M3 heat-set inserts**. Board-hole positions, insert depth and the rear/stand geometry are unchanged. The refreshed front STL, editable parameters, previews and print ZIP include these corrections. Revised physical fit is awaiting confirmation.

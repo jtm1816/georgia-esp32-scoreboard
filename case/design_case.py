@@ -12,8 +12,8 @@ from fontTools.pens.basePen import BasePen
 OUT = Path(__file__).resolve().parent
 P = dict(board_w=101.5,board_h=55.5,board_thickness=1.6,hole_spacing_x=94.5,hole_spacing_y=47.9,
          case_w=125.0,case_h=88.0,case_depth=30.0,wall=2.4,corner=6.0,
-         screen_window_w=74.2,screen_window_h=49.6,screen_pocket_w=85.6,screen_pocket_h=56.1,
-         board_front_z=6.8,insert_od=4.6,insert_length=4.0,insert_pocket_depth=4.3,
+         screen_window_w=80.4,screen_window_h=49.6,screen_active_w=80.0,screen_active_h=48.96,screen_offset_right=1.0,screen_pocket_w=85.6,screen_pocket_h=56.1,
+         board_front_z=6.8,insert_od=4.0,insert_outer_d=4.2,insert_length=4.0,insert_pocket_depth=4.3,
          boss_od=7.2,screw_clearance=3.4,screw_head_d=6.2,screw_head_recess=1.8,
          usb_w=14.0,usb_h=5.5,usb_y=-12.0,usb_x=-35.0,tilt_from_vertical=30.0)
 if (OUT/'parameters.json').exists():P.update(json.loads((OUT/'parameters.json').read_text()))
@@ -30,7 +30,7 @@ def union(shapes):
 holes=[(sx*P['hole_spacing_x']/2,sy*P['hole_spacing_y']/2) for sx in (-1,1) for sy in (-1,1)]
 outer=rr(P['case_w'],P['case_h'],P['corner'])
 bezel=outer.extrude(P['wall'])
-bezel-=rr(P['screen_window_w'],P['screen_window_h'],1.2).extrude(12).translate((0,0,-1))
+bezel-=rr(P['screen_window_w'],P['screen_window_h'],1.2).extrude(12).translate((-P['screen_offset_right'],0,-1))
 for x,y in holes:
     bezel+=cyl(P['boss_od'],P['board_front_z']-2,2,x,y)
 bezel-=rr(P['screen_pocket_w'],P['screen_pocket_h'],0.6).extrude(8).translate((0,0,1.8))
@@ -174,7 +174,7 @@ for name,shape,color in [('red bezel',posed(bezel-letters),[186,12,47,255]),('wh
     m=mesh(shape);m.visual.vertex_colors=np.tile(color,(len(m.vertices),1));scene.add_geometry(m,node_name=name)
 scene.export(OUT/'case-assembly.glb')
 # Drawing-only screen reference; not included among printable parts.
-glass=posed(rr(73.44,48.96,1).extrude(.3).translate((0,0,1.8)))
+glass=posed(rr(P['screen_active_w'],P['screen_active_h'],1).extrude(.3).translate((-P['screen_offset_right'],0,1.8)))
 gm=mesh(glass);gm.visual.vertex_colors=np.tile([12,15,19,255],(len(gm.vertices),1));scene.add_geometry(gm,node_name='screen reference - do not print')
 scene.export(OUT/'case-assembly.glb')
 np.savez_compressed(OUT/'render-data.npz',**{

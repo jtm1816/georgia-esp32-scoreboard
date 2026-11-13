@@ -1,0 +1,11 @@
+{
+  "opening_mm": [
+    80.4,
+    49.6
+  ],
+  "offset_right_front_view_mm": 1.0,
+  "pilot_diameter_mm": 4.0,
+  "insert_outside_diameter_mm": 4.2,
+  "stl_dimension_checks": "passed",
+  "revised_physical_fit": "unconfirmed"
+}

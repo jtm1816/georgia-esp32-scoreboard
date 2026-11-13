@@ -1,4 +1,4 @@
-# Georgia ESP32-035 case - attached parts revision, November 9, 2026
+# Georgia ESP32-035 case - screen and insert fit revision, November 13, 2026
 
 ![CAD assembly](case-preview.png)
 
@@ -15,14 +15,14 @@ There are no loose letters or separate stand. The front still unscrews for board
 
 - Board outline: 101.5 x 55.5 mm. Four mounting holes (assumed 3.2 mm; the supplied drawing does not label their diameter) at 94.5 x 47.9 mm center spacing, per the supplied board diagram.
 - Body: 125 x 88 x 30 mm. Stand: 119 mm wide, approximately 84 mm deep after front trimming. Fixed 30-degree tilt back from vertical.
-- Visible window: 74.2 x 49.6 mm around an assumed 73.44 x 48.96 mm active area; this active-area size is not dimensioned on the supplied image. Provisional centered glass pocket: 85.6 x 56.1 mm, based on the 85 mm glass width and full-board height shown. Measure the actual glass outline and offset before printing.
+- Visible opening: 80.4 x 49.6 mm, shifted 1 mm right when viewed directly from the front. The owner measured the viewable screen width as exactly 80 mm. The opening height remains unchanged; the viewable height has not been measured. Provisional glass pocket: 85.6 x 56.1 mm, based on the 85 mm glass width and full-board height shown. The glass pocket and mounting-hole positions are unchanged.
 - PCB thickness 1.6 mm and front PCB plane 6.8 mm behind the bezel face are provisional. The pocket floor is 1.8 mm behind the front; this allows a nominal 5 mm screen stack. Do not clamp the screen if the actual stack differs.
-- Four M3 heat-set inserts: assumed 4.6 mm outside diameter x 4 mm long, in 4.6 mm pilot pockets 4.3 mm deep. Use the insert supplier's recommended pilot size, adjusting `insert_od` as needed.
+- Four M3 heat-set inserts: owner-measured outside diameter 4.2 mm. Pilot holes are now 4.0 mm diameter and 4.3 mm deep, giving 0.1 mm material per side for heat-setting. Insert length is still assumed to be 4 mm. `insert_od` is the pilot-hole diameter; `insert_outer_d` records the actual insert diameter. Fit remains dependent on the insert knurl and print tolerances.
 - Four M3 x 25 mm button-head screws are suggested for this deeper case, assuming 6.2 mm diameter x 1.8 mm head recesses. Check screw length against the actual assembled stack so screws engage the inserts without bottoming out.
 - USB-C adapter opening: exactly 14 mm wide x 5.5 mm tall, with no added clearance. The vertical mounting face is 2.4 mm thick and the pad rests at base level. A stand recess clears the lowered pad. Adapter retention clips, flange size, solder pads, cable bend space, and internal wiring fit remain unverified.
 - The board diagram shows edge USB, SD, switches and connectors. The larger cavity leaves space around the PCB but does not provide outside access cutouts to every board connector. Open the shell for programming, SD or button access. No battery or speaker is included in this design.
 
-No physical fit, load, or print test has been performed on the new case. Do not reuse the old 2.8-inch case dimensions. Digital mesh and interference checks do not establish hardware fit.
+The owner reported screen-opening misalignment and oversized insert holes on the previous print. These corrected dimensions have not yet been confirmed on a new print; no load test has been performed. Do not reuse the old 2.8-inch case dimensions. Digital mesh and interference checks do not establish hardware fit.
 
 ## PETG printing and attached white letters
 
@@ -60,3 +60,11 @@ Edit parameters.json, then run design_case.py. Run render_preview.py for the CAD
 ## Lettering orientation correction
 
 The raised lettering is reversed in the local front model so it reads correctly from the exterior of the finished bezel. The assembled preview uses a rigid rotation matching the printable part. Use the refreshed front STL and ZIP, replacing the earlier attached-lettering export.
+
+## Screen fit correction
+
+The owner measured the viewable screen width as exactly 80 mm. The opening is now 80.4 mm wide, allowing 0.2 mm per side. The owner specified a 1 mm shift to the right when viewed directly from the front. The opening now follows that offset; mounting holes and the glass pocket stay fixed. The opening height remains 49.6 mm because no new viewable-height measurement has been supplied.
+
+## Insert fit correction - November 11, 2026
+
+The insert pilot holes were reduced from 4.6 mm to 4.0 mm for the owner's 4.2 mm outside-diameter inserts. Centers, boss diameter and pocket depth are unchanged. The 80.4 mm screen opening and its 1 mm rightward offset are retained.

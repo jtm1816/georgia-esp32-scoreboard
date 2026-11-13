@@ -68,3 +68,7 @@ On October 29, 2026 the owner confirmed correct landscape colors and both touch 
 The lettering is now fused to the front bezel as raised geometry. The rear shell and stand are one permanent print, joined by reinforced ribs with screwdriver access retained. Print the front red and switch to white PETG for the final raised-letter layers; print the combined rear/stand black. The bundle now contains two STL files. See the assembly guide for orientation and support changes. Printed fit and joint strength remain unverified.
 
 The rear USB-C adapter and wiring channel are now offset toward the board USB side (35 mm left of center viewed from the front). The front of the stand is closed; the cable enters only from the rear.
+
+## Screen and insert fit corrections - November 13, 2026
+
+The front opening is now **80.4 mm wide x 49.6 mm high**, shifted **1 mm right when viewed from the front**, following the owner's measured 80 mm viewable width. Height remains unchanged. The four insert pilot holes are reduced to **4.0 mm** for **4.2 mm outside-diameter M3 heat-set inserts**. Board-hole positions, insert depth and the rear/stand geometry are unchanged. The refreshed front STL, editable parameters, previews and print ZIP include these corrections. Revised physical fit is awaiting confirmation.
